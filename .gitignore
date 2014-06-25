@@ -4,3 +4,5 @@ libjitsi.jar
 *.swp
 dist
 *.class
+libjitsi.iml
+pom.xml
