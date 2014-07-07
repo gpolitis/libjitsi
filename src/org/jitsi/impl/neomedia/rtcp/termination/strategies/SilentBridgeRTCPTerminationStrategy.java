@@ -13,7 +13,7 @@ import org.jitsi.service.neomedia.*;
 /**
  * Created by gp on 7/1/14.
  */
-public class NoRTCPTerminationStrategy
+public class SilentBridgeRTCPTerminationStrategy
     implements RTCPTerminationStrategy
 {
     private final RTCPReportBuilder reportBuilder =

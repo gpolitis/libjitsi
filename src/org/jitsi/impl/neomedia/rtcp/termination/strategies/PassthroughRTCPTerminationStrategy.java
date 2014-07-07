@@ -13,7 +13,7 @@ import org.jitsi.service.neomedia.*;
 /**
  * Created by gp on 7/1/14.
  */
-public class LegacyRTCPTerminationStrategy
+public class PassthroughRTCPTerminationStrategy
     implements RTCPTerminationStrategy
 {
     private final RTCPPacketTransformer packetTransformer
