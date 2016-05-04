@@ -19,10 +19,11 @@ import java.io.*;
 import java.util.*;
 import net.sf.fmj.media.rtp.*;
 import org.jitsi.impl.neomedia.*;
-import org.jitsi.impl.neomedia.codec.video.vp8.*;
 import org.jitsi.impl.neomedia.rtcp.*;
 import org.jitsi.impl.neomedia.rtcp.termination.strategies.*;
 import org.jitsi.service.neomedia.*;
+import org.jitsi.service.neomedia.codec.Constants;
+import org.jitsi.service.neomedia.format.MediaFormat;
 import org.jitsi.util.*;
 
 /**
@@ -414,11 +415,25 @@ class SsrcGroupRewriter
      */
     boolean isKeyFrame(RawPacket pkt)
     {
-        int sourceSSRC = pkt.getSSRC();
-        Byte redPT = ssrcRewritingEngine.ssrc2red.get(sourceSSRC);
-        byte vp8PT = 0x64;
-
-        return Utils.isKeyFrame(pkt, redPT, vp8PT);
+        byte pt = pkt.getPayloadType();
+        Byte redPT = null, codecPT = null;
+        String codecType = null;
+        for (Map.Entry<Byte, MediaFormat> entry :
+            ssrcRewritingEngine.getMediaStream().getDynamicRTPPayloadTypes().entrySet())
+        {
+            String encoding = entry.getValue().getEncoding();
+            Byte payloadType = entry.getKey();
+            if (payloadType.equals(pt))
+            {
+                codecType = encoding;
+                codecPT = payloadType;
+            }
+            if (Constants.RED.equalsIgnoreCase(encoding))
+            {
+                redPT = payloadType;
+            }
+        }
+        return Utils.isKeyFrame(pkt, redPT, codecPT, codecType);
     }
 
     /**

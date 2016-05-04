@@ -20,8 +20,8 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 
 import org.jitsi.impl.neomedia.*;
-import org.jitsi.impl.neomedia.codec.video.vp8.*;
 import org.jitsi.impl.neomedia.rtp.*;
+import org.jitsi.impl.neomedia.transform.rewriting.*;
 import org.jitsi.service.neomedia.codec.*;
 import org.jitsi.service.neomedia.event.*;
 import org.jitsi.service.neomedia.format.*;
@@ -276,7 +276,8 @@ public class RTCPFeedbackMessageSender
 
             // Reduce auto-boxing (even tho the compiler or the JIT should do
             // this automatically).
-            Byte redPT = null, vp8PT = null;
+            Byte redPT = null, codecPT = null;
+            String codecType = null;
 
             // XXX do we want to do this only once?
             for (Map.Entry<Byte, MediaFormat> entry : streamRTPManager
@@ -284,24 +285,36 @@ public class RTCPFeedbackMessageSender
                 .entrySet())
             {
                 String encoding = entry.getValue().getEncoding();
-                if (Constants.VP8.equals(encoding))
+                if (pt == entry.getKey())
                 {
-                    vp8PT = entry.getKey();
+                    codecPT = entry.getKey();
+                    codecType = encoding;
                 }
-                else if (Constants.RED.equals(encoding))
+                if (Constants.RED.equalsIgnoreCase(encoding))
                 {
                     redPT = entry.getKey();
                 }
             }
 
-            if (vp8PT == null || vp8PT != pt)
+            if (codecPT == null)
             {
                 return;
             }
-
-            if (!Utils.isKeyFrame(buf, off, len, redPT, vp8PT))
-            {
-                return;
+            switch (codecType) {
+                case Constants.VP8:
+                    if (!Utils.isVP8KeyFrame(buf, off, len, redPT, codecPT))
+                    {
+                        return;
+                    }
+                    break;
+                case Constants.H264:
+                    if (!Utils.isH264KeyFrame(buf, off, len, redPT, codecPT))
+                    {
+                        return;
+                    }
+                    break;
+                default:
+                    break;
             }
 
             if (TRACE)

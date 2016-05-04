@@ -369,7 +369,6 @@ public class SsrcRewritingEngine implements TransformEngine
         rtx2primary = new ConcurrentHashMap<>();
         ssrc2red = new ConcurrentHashMap<>();
         ssrc2fec = new ConcurrentHashMap<>();
-
         initialized = true;
 
         return true;

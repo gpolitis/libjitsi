@@ -82,7 +82,7 @@ public class Constants
     /**
      * The H264 constant.
      */
-    public static final String H264 = "h264";
+    public static final String H264 = "H264";
 
     /**
      * The H264/rtp constant.
