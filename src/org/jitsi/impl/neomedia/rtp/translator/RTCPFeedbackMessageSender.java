@@ -20,8 +20,8 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 
 import org.jitsi.impl.neomedia.*;
+import org.jitsi.impl.neomedia.codec.video.Utils;
 import org.jitsi.impl.neomedia.rtp.*;
-import org.jitsi.impl.neomedia.transform.rewriting.*;
 import org.jitsi.service.neomedia.codec.*;
 import org.jitsi.service.neomedia.event.*;
 import org.jitsi.service.neomedia.format.*;
@@ -300,22 +300,11 @@ public class RTCPFeedbackMessageSender
             {
                 return;
             }
-            switch (codecType) {
-                case Constants.VP8:
-                    if (!Utils.isVP8KeyFrame(buf, off, len, redPT, codecPT))
-                    {
-                        return;
-                    }
-                    break;
-                case Constants.H264:
-                    if (!Utils.isH264KeyFrame(buf, off, len, redPT, codecPT))
-                    {
-                        return;
-                    }
-                    break;
-                default:
-                    break;
+            if (!Utils.isKeyFrame(buf, off, len, redPT, codecPT, codecType))
+            {
+                return;
             }
+
 
             if (TRACE)
             {

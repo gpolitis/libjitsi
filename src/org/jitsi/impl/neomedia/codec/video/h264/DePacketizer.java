@@ -548,7 +548,7 @@ public class DePacketizer
      */
     public boolean isKeyFrame(byte[] buff, int off, int len)
     {
-      if (buff == null || len < 1 || buff.length < len)
+      if (buff == null || buff.length < off + Math.max(len, 1))
       {
           return false;
       }
@@ -578,7 +578,7 @@ public class DePacketizer
      * Checks if a a fragment of a NAL unit from a specific FU-A RTP packet
      * payload is keyframe or not
      */
-    private Boolean parseFuaNaluForKeyFrame(byte[] buff, int off, int len) {
+    private boolean parseFuaNaluForKeyFrame(byte[] buff, int off, int len) {
       if (len < kFuAHeaderSize)
       {
           return false;
@@ -609,10 +609,12 @@ public class DePacketizer
             }
             nalType = buff[off + kStapAHeaderSize] & kTypeMask;
         }
-        return (nalType == kIdr || nalType == kSps || nalType == kPps || nalType == kSei);
+        return (nalType == kIdr || nalType == kSps ||
+                nalType == kPps || nalType == kSei);
     }
 
-    private static boolean verifyStapANaluLengths(byte[] data, int offset, int lengthRemaining)
+    private static boolean verifyStapANaluLengths(byte[] data, int offset,
+        int lengthRemaining)
     {
         int initialLength = lengthRemaining;
         while (lengthRemaining > 0 && offset + 1 < initialLength)
