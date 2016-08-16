@@ -3702,12 +3702,12 @@ public class MediaStreamImpl
             return false;
         }
 
-        if (payloadType == vp8PT)
+        if (vp8PT != null && payloadType == vp8PT)
         {
             return org.jitsi.impl.neomedia.codec.video.vp8.DePacketizer
                 .isKeyFrame(buf, payloadOff, payloadLen);
         }
-        else if (payloadType == h264PT)
+        else if (h264PT != null && payloadType == h264PT)
         {
             return org.jitsi.impl.neomedia.codec.video.h264.DePacketizer
                 .isKeyFrame(buf, payloadOff, payloadLen);
