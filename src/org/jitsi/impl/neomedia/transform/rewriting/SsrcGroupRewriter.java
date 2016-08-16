@@ -19,7 +19,6 @@ import java.io.*;
 import java.util.*;
 import net.sf.fmj.media.rtp.*;
 import org.jitsi.impl.neomedia.*;
-import org.jitsi.impl.neomedia.codec.video.Utils;
 import org.jitsi.impl.neomedia.rtcp.*;
 import org.jitsi.impl.neomedia.rtcp.termination.strategies.*;
 import org.jitsi.service.neomedia.*;
@@ -292,7 +291,9 @@ class SsrcGroupRewriter
             // sequence number, and RTP timestamp.
             if (TRACE && p != null)
             {
-                boolean isKeyframe = isKeyFrame(p);
+                boolean isKeyframe = ssrcRewritingEngine.getMediaStream()
+                    .isKeyFrame(p.getBuffer(), p.getOffset(), p.getLength());
+
                 long ssrc1 = p.getSSRCAsLong();
                 int seqnum1 = p.getSequenceNumber();
                 long ts1 = p.getTimestamp();
@@ -371,7 +372,11 @@ class SsrcGroupRewriter
             {
                 // We're only supposed to switch on key frames. Here we check if
                 // that's the case.
-                if (!isKeyFrame(pkt))
+                boolean isKeyframe
+                    = ssrcRewritingEngine.getMediaStream().isKeyFrame(
+                        pkt.getBuffer(), pkt.getOffset(), pkt.getLength());
+
+                if (!isKeyframe)
                 {
                     logger.warn(
                             "We're switching NOT on a key frame (seq="
@@ -405,36 +410,6 @@ class SsrcGroupRewriter
                     "Don't know about SSRC " + pkt.getSSRCAsLong()
                         + "! Somebody is messing with us!");
         }
-    }
-
-    /**
-     * Determines whether a specific packet is a key frame.
-     *
-     * @param pkt the {@code RawPacket} to be determined whether it is a key
-     * frame
-     * @return {@code true} if {@pkt} is a key frame; otherwise, {@code false}
-     */
-    boolean isKeyFrame(RawPacket pkt)
-    {
-        byte pt = pkt.getPayloadType();
-        Byte redPT = null, codecPT = null;
-        String codecType = null;
-        for (Map.Entry<Byte, MediaFormat> entry :
-            ssrcRewritingEngine.getMediaStream().getDynamicRTPPayloadTypes().entrySet())
-        {
-            String encoding = entry.getValue().getEncoding();
-            Byte payloadType = entry.getKey();
-            if (payloadType.equals(pt))
-            {
-                codecType = encoding;
-                codecPT = payloadType;
-            }
-            if (Constants.RED.equalsIgnoreCase(encoding))
-            {
-                redPT = payloadType;
-            }
-        }
-        return Utils.isKeyFrame(pkt, redPT, codecPT, codecType);
     }
 
     /**

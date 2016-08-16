@@ -20,7 +20,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 
 import org.jitsi.impl.neomedia.*;
-import org.jitsi.impl.neomedia.codec.video.Utils;
 import org.jitsi.impl.neomedia.rtp.*;
 import org.jitsi.service.neomedia.codec.*;
 import org.jitsi.service.neomedia.event.*;
@@ -190,7 +189,6 @@ public class RTCPFeedbackMessageSender
     public void maybeStopRequesting(
         StreamRTPManagerDesc streamRTPManager,
         int ssrc,
-        int pt,
         byte[] buf,
         int off,
         int len)
@@ -198,7 +196,7 @@ public class RTCPFeedbackMessageSender
         KeyframeRequester kfRequester = kfRequesters.get(ssrc);
         if (kfRequester != null)
         {
-            kfRequester.maybeStopRequesting(streamRTPManager, pt, buf, off, len);
+            kfRequester.maybeStopRequesting(streamRTPManager, buf, off, len);
         }
     }
 
@@ -264,7 +262,6 @@ public class RTCPFeedbackMessageSender
          */
         public void maybeStopRequesting(
             StreamRTPManagerDesc streamRTPManager,
-            int pt,
             byte[] buf,
             int off,
             int len)
@@ -274,33 +271,8 @@ public class RTCPFeedbackMessageSender
                 return;
             }
 
-            // Reduce auto-boxing (even tho the compiler or the JIT should do
-            // this automatically).
-            Byte redPT = null, codecPT = null;
-            String codecType = null;
-
-            // XXX do we want to do this only once?
-            for (Map.Entry<Byte, MediaFormat> entry : streamRTPManager
-                .streamRTPManager.getMediaStream().getDynamicRTPPayloadTypes()
-                .entrySet())
-            {
-                String encoding = entry.getValue().getEncoding();
-                if (pt == entry.getKey())
-                {
-                    codecPT = entry.getKey();
-                    codecType = encoding;
-                }
-                if (Constants.RED.equalsIgnoreCase(encoding))
-                {
-                    redPT = entry.getKey();
-                }
-            }
-
-            if (codecPT == null)
-            {
-                return;
-            }
-            if (!Utils.isKeyFrame(buf, off, len, redPT, codecPT, codecType))
+            if (!streamRTPManager
+                .streamRTPManager.getMediaStream().isKeyFrame(buf, off, len))
             {
                 return;
             }

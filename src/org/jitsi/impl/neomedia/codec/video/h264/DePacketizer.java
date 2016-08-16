@@ -546,7 +546,7 @@ public class DePacketizer
      * @return true if the buffer contains a H264 key frame at offset
      * <tt>offset</tt>.
      */
-    public boolean isKeyFrame(byte[] buff, int off, int len)
+    public static boolean isKeyFrame(byte[] buff, int off, int len)
     {
       if (buff == null || buff.length < off + Math.max(len, 1))
       {
@@ -578,7 +578,7 @@ public class DePacketizer
      * Checks if a a fragment of a NAL unit from a specific FU-A RTP packet
      * payload is keyframe or not
      */
-    private boolean parseFuaNaluForKeyFrame(byte[] buff, int off, int len) {
+    private static boolean parseFuaNaluForKeyFrame(byte[] buff, int off, int len) {
       if (len < kFuAHeaderSize)
       {
           return false;
@@ -590,7 +590,7 @@ public class DePacketizer
      * Checks if a a fragment of a NAL unit from a specific FU-A RTP packet
      * payload is keyframe or not
      */
-    private boolean parseSingleNaluForKeyFrame(byte[] buff, int off, int len)
+    private static boolean parseSingleNaluForKeyFrame(byte[] buff, int off, int len)
     {
         int naluStart = off + kNalHeaderSize;
         int naluLength = len - kNalHeaderSize;
